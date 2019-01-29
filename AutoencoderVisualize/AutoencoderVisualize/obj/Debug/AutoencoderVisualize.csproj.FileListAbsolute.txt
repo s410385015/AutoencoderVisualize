@@ -1,0 +1,14 @@
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\bin\Debug\AutoencoderVisualize.exe.config
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\bin\Debug\AutoencoderVisualize.exe
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\bin\Debug\AutoencoderVisualize.pdb
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\bin\Debug\MetroFramework.Design.dll
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\bin\Debug\MetroFramework.dll
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\bin\Debug\MetroFramework.Fonts.dll
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.DimGraph.resources
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.Form1.resources
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.Properties.Resources.resources
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.csproj.GenerateResource.Cache
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.exe
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.pdb
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.ColorBar.resources
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.csprojResolveAssemblyReference.cache
