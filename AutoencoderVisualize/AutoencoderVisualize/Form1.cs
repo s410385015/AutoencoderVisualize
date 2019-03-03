@@ -16,10 +16,16 @@ namespace AutoencoderVisualize
         public List<String> tags;
         public List<List<double>> allData;
         public List<List<List<double>>> idvData;
+        public MySocket client;
+       
         public Form1()
         {
             InitializeComponent();
             idvData = new List<List<List<double>>>();
+            client = new MySocket();
+            client.StartClient("127.0.0.1", 7777);
+            connector.Start();
+            
         }
 
         private void metroUserControl1_Load(object sender, EventArgs e)
@@ -86,6 +92,21 @@ namespace AutoencoderVisualize
             SubDimGraph.SetData(idvData[index]);
             SubDimGraph.TriggerLabel(index);
             SubDimGraph.NotifyRedraw();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            client.Send("abcde");
+        }
+
+        private void connector_Tick(object sender, EventArgs e)
+        {
+
+            if (!client.flag)
+            {
+                client.StartClient("127.0.0.1", 7777);
+                Console.WriteLine("try connecting...");
+            }
         }
     }
 }
