@@ -34,7 +34,7 @@ namespace AutoencoderVisualize
                 MessageBox.Show("連線異常！");
             }
         }
-        public void Recv()
+        public void Recv(AsyncCallback EndRecv)
         {
             
             try
@@ -47,6 +47,7 @@ namespace AutoencoderVisualize
             }
         }
 
+        /*
         private void EndRecv(IAsyncResult r)
         {
 
@@ -63,6 +64,7 @@ namespace AutoencoderVisualize
             }
 
         }
+        */
 
         public void Send(String str)
         {
@@ -84,7 +86,7 @@ namespace AutoencoderVisualize
             try
             {
                 client.EndSend(r);
-                Recv();
+           
             }
             catch
             {

@@ -70,6 +70,7 @@ namespace AutoencoderVisualize
 
             dimGraph.Location = new Point(colorBar.Location.X - dimGraph.Width, dimGraph.Location.Y);
             SubDimGraph.Location = new Point(200, dimGraph.Location.Y);
+            LatentFig.Location = new Point(200, dimGraph.Location.Y +SubDimGraph.Height+100);
             UpdateFrame();
         }
 
@@ -97,6 +98,7 @@ namespace AutoencoderVisualize
         private void button2_Click(object sender, EventArgs e)
         {
             client.Send("abcde");
+            client.Recv(GetLatentFig);
         }
 
         private void connector_Tick(object sender, EventArgs e)
@@ -106,6 +108,27 @@ namespace AutoencoderVisualize
             {
                 client.StartClient("127.0.0.1", 7777);
                 Console.WriteLine("try connecting...");
+            }
+        }
+
+        public void GetLatentFig(IAsyncResult result)
+        {
+            
+            try
+            {
+                int len = client.client.EndReceive(result);
+                
+                if(len==2)
+                {
+                    Bitmap bitmap = new Bitmap("C:\\Users\\ec131b\\Desktop\\Yu\\Proj\\Database\\latent.png");
+                    LatentFig.Image = bitmap;
+                    MessageBox.Show("done!");
+                    bitmap.Dispose();
+                }
+            }
+            catch
+            {
+
             }
         }
     }

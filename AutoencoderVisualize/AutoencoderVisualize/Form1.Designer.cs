@@ -32,9 +32,11 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.connector = new System.Windows.Forms.Timer(this.components);
+            this.LatentFig = new System.Windows.Forms.PictureBox();
             this.SubDimGraph = new AutoencoderVisualize.DimGraph();
             this.colorBar = new AutoencoderVisualize.ColorBar();
             this.dimGraph = new AutoencoderVisualize.DimGraph();
+            ((System.ComponentModel.ISupportInitialize)(this.LatentFig)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -61,6 +63,16 @@
             // 
             this.connector.Interval = 10000;
             this.connector.Tick += new System.EventHandler(this.connector_Tick);
+            // 
+            // LatentFig
+            // 
+            this.LatentFig.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.LatentFig.Location = new System.Drawing.Point(178, 195);
+            this.LatentFig.Name = "LatentFig";
+            this.LatentFig.Size = new System.Drawing.Size(588, 380);
+            this.LatentFig.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.LatentFig.TabIndex = 5;
+            this.LatentFig.TabStop = false;
             // 
             // SubDimGraph
             // 
@@ -97,6 +109,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 653);
+            this.Controls.Add(this.LatentFig);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.SubDimGraph);
             this.Controls.Add(this.colorBar);
@@ -106,6 +119,7 @@
             this.Text = "Form1";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.Form1_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.LatentFig)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -118,6 +132,7 @@
         private DimGraph SubDimGraph;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Timer connector;
+        private System.Windows.Forms.PictureBox LatentFig;
 
     }
 }
