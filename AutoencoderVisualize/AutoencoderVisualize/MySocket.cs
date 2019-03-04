@@ -31,7 +31,7 @@ namespace AutoencoderVisualize
             catch
             {
                 flag = false;
-                MessageBox.Show("連線異常！");
+                //MessageBox.Show("連線異常！");
             }
         }
         public void Recv(AsyncCallback EndRecv)
@@ -71,7 +71,7 @@ namespace AutoencoderVisualize
             Byte[] cmd = Encoding.UTF8.GetBytes(str);
             try
             {
-                MessageBox.Show("send");
+                //MessageBox.Show("send");
                 client.BeginSend(cmd, 0, cmd.Length, SocketFlags.None, EndSend, client);
             }
             catch(Exception ex)

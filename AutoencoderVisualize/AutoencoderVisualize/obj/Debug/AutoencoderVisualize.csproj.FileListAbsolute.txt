@@ -12,3 +12,4 @@ C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\De
 C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.pdb
 C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.ColorBar.resources
 C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.csprojResolveAssemblyReference.cache
+C:\Users\ec131b\Desktop\Yu\Proj\AutoencoderVisualize\AutoencoderVisualize\obj\Debug\AutoencoderVisualize.PCP.resources

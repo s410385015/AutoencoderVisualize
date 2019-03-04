@@ -34,5 +34,19 @@ namespace AutoencoderVisualize
             }
             return searchList;
         }
+
+        public static List<List<float>> ReadDataFloat(string filePath)
+        {
+            var reader = new StreamReader(File.OpenRead(filePath), System.Text.Encoding.Default);
+            List<List<float>> searchList = new List<List<float>>();
+            while (!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+                List<float> result = (line.Split(',')).Select(x => float.Parse(x)).ToList();
+
+                searchList.Add(result);
+            }
+            return searchList;
+        }
     }
 }

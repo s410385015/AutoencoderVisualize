@@ -17,7 +17,9 @@ namespace AutoencoderVisualize
         public List<List<double>> allData;
         public List<List<List<double>>> idvData;
         public MySocket client;
-       
+        public string databasePath = @"C:\\Users\\ec131b\\Desktop\\Yu\\Proj\\Database\\";
+        public bool isHandling = false;
+        public Bitmap bitmap;
         public Form1()
         {
             InitializeComponent();
@@ -25,7 +27,8 @@ namespace AutoencoderVisualize
             client = new MySocket();
             client.StartClient("127.0.0.1", 7777);
             connector.Start();
-            
+            this.DoubleBuffered = true;
+            //latentTimer.Start();
         }
 
         private void metroUserControl1_Load(object sender, EventArgs e)
@@ -71,8 +74,37 @@ namespace AutoencoderVisualize
             dimGraph.Location = new Point(colorBar.Location.X - dimGraph.Width, dimGraph.Location.Y);
             SubDimGraph.Location = new Point(200, dimGraph.Location.Y);
             LatentFig.Location = new Point(200, dimGraph.Location.Y +SubDimGraph.Height+100);
+            
+            
+            SetPCPGraph();
+            
             UpdateFrame();
         }
+
+        public void SetPCPGraph()
+        {
+            pcpGraph.Location = new Point(dimGraph.Location.X, dimGraph.Location.Y + SubDimGraph.Height );
+            pcpGraph.Size = new Size(1000, 500);
+            pcpGraph.Init();
+            pcpGraph.cb = HandlePCPDrag;
+            pcpGraph.AlphaChange((int)(10 * 2.55));
+            List<List<float>> data = DataLoader.ReadDataFloat(databasePath+"data.csv");
+            List<List<float>> range = new List<List<float>>();
+            List<float> tmp=new List<float>();
+            List<String> tags = DataLoader.ReadTags(databasePath + "tags.csv"); 
+
+
+            for(int i=0;i<=5;i++)
+                tmp.Add(i*0.2f);
+
+            for (int i = 0; i < data[0].Count; i++)
+                range.Add(tmp);
+
+            pcpGraph.InsertData(data[0].Count, data.Count, range, data, tags);
+            pcpGraph.isExist = true;
+            pcpGraph.drawGraph();
+        }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -86,6 +118,7 @@ namespace AutoencoderVisualize
             colorBar.NotifyRedraw();
             dimGraph.NotifyRedraw();
             SubDimGraph.NotifyRedraw();
+            pcpGraph.NotifyRedraw();
         }
 
         public void SetSubData(int index)
@@ -97,7 +130,7 @@ namespace AutoencoderVisualize
 
         private void button2_Click(object sender, EventArgs e)
         {
-            client.Send("abcde");
+            client.Send("latent");
             client.Recv(GetLatentFig);
         }
 
@@ -107,7 +140,7 @@ namespace AutoencoderVisualize
             if (!client.flag)
             {
                 client.StartClient("127.0.0.1", 7777);
-                Console.WriteLine("try connecting...");
+                //Console.WriteLine("try connecting...");
             }
         }
 
@@ -120,16 +153,64 @@ namespace AutoencoderVisualize
                 
                 if(len==2)
                 {
-                    Bitmap bitmap = new Bitmap("C:\\Users\\ec131b\\Desktop\\Yu\\Proj\\Database\\latent.png");
+                    bitmap = new Bitmap(databasePath+"latent.png");
                     LatentFig.Image = bitmap;
-                    MessageBox.Show("done!");
-                    bitmap.Dispose();
+                  
+                    //bitmap.Dispose();
+                   
                 }
-            }
-            catch
-            {
 
             }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            isHandling = false;
         }
+
+        public void HandlePCPDrag()
+        {
+            if (!isHandling)
+            {
+                isHandling = true;
+                string meg = "latent";
+
+                for (int i = 0; i < pcpGraph.dragbox.Count; i++)
+                {
+                    if (pcpGraph.dragbox[i].flag)
+                        meg += "," + (1 - pcpGraph.dragbox[i].value).ToString();
+                    else
+                        meg += ",-1";
+                }
+                if(bitmap!=null)
+                    bitmap.Dispose();
+                client.Send(meg);
+                //latentTimer.Start(); 
+                client.Recv(GetLatentFig);
+            }
+        }
+
+        private void latentTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+
+                bitmap = new Bitmap(databasePath + "latent.png");
+                LatentFig.Image = bitmap;
+                bitmap.Dispose();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+
+            isHandling = false;
+            
+        }
+
+        
+     
     }
 }

@@ -29,10 +29,13 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.connector = new System.Windows.Forms.Timer(this.components);
             this.LatentFig = new System.Windows.Forms.PictureBox();
+            this.latentTimer = new System.Windows.Forms.Timer(this.components);
+            this.pcpGraph = new AutoencoderVisualize.PCP();
             this.SubDimGraph = new AutoencoderVisualize.DimGraph();
             this.colorBar = new AutoencoderVisualize.ColorBar();
             this.dimGraph = new AutoencoderVisualize.DimGraph();
@@ -67,12 +70,25 @@
             // LatentFig
             // 
             this.LatentFig.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.LatentFig.Image = ((System.Drawing.Image)(resources.GetObject("LatentFig.Image")));
             this.LatentFig.Location = new System.Drawing.Point(178, 195);
             this.LatentFig.Name = "LatentFig";
             this.LatentFig.Size = new System.Drawing.Size(588, 380);
             this.LatentFig.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.LatentFig.TabIndex = 5;
             this.LatentFig.TabStop = false;
+            // 
+            // latentTimer
+            // 
+            this.latentTimer.Interval = 30;
+            this.latentTimer.Tick += new System.EventHandler(this.latentTimer_Tick);
+            // 
+            // pcpGraph
+            // 
+            this.pcpGraph.Location = new System.Drawing.Point(621, 298);
+            this.pcpGraph.Name = "pcpGraph";
+            this.pcpGraph.Size = new System.Drawing.Size(406, 258);
+            this.pcpGraph.TabIndex = 6;
             // 
             // SubDimGraph
             // 
@@ -109,6 +125,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 653);
+            this.Controls.Add(this.pcpGraph);
             this.Controls.Add(this.LatentFig);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.SubDimGraph);
@@ -133,6 +150,8 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Timer connector;
         private System.Windows.Forms.PictureBox LatentFig;
+        private PCP pcpGraph;
+        private System.Windows.Forms.Timer latentTimer;
 
     }
 }

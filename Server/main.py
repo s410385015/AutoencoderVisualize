@@ -31,14 +31,19 @@ class MyServer(SocketServer):
         self.la,self.re=self.ModelEval(self.AE)
         
     def onmessage(self, client, message):
-        message=message.decode("utf-8") 
-        print ("Client Sent Message",str(message))
+        message=np.array(message.decode("utf-8").split(','))
+        
+        print ("Client Sent Message")
+        print(message)
 
-        if message=='abcde':
-            print("Test")
+        if message[0]=='latent':
+            message=(message[1:-1]).astype(np.float)
+            
+            print(message)
+
             self.DrawLatent(self.la)
-            self.FindLatent(self.AE)
-            plt.savefig('..\\Database\\latent.png',d=600)
+            if self.MatchLatent(self.AE,message):
+                plt.savefig('..\\Database\\latent.png',d=600)
             plt.clf()
             self.broadcast(str.encode('ok'))
         #Sending message to all clients
@@ -126,9 +131,9 @@ class MyServer(SocketServer):
             tmp=[]
             tmp_l=[]
             for k in decoded[0]:
-                tmp.append(k)
+                tmp.append(k.data)
             for l in encoded[0]:
-                tmp_l.append(l)
+                tmp_l.append(l.data)
             latent.append(tmp_l)
             reconstruct.append(tmp)
         latent=np.array(latent)
@@ -141,27 +146,43 @@ class MyServer(SocketServer):
         
     
 
-    def FindLatent(self,model):
+    def MatchLatent(self,model,expect):
         #test_x=Variable(torch.randn(1,2),requires_grad=True)
-        test_x=Variable(torch.FloatTensor([[0.5,0.5]]),requires_grad=True)
+        _x=np.mean(self.la[:,0])
+        _y=np.mean(self.la[:,1])
+        print(_x)
+        print(_y)
+        test_x=Variable(torch.FloatTensor([[_x,_y]]),requires_grad=True)
         loss_func=nn.MSELoss()
         test_opt=optim.Adam([test_x],lr=0.1)
+
         for epoch in range(100):
             test_output=model.decoder(test_x[0])  
-            cost=loss_func(test_output[0],torch.tensor([0.3]))+loss_func(test_output[1],torch.tensor([0.5]))
+            cost=torch.FloatTensor([[0]])
+            
+            flag=True
+            for i in range(expect.shape[0]):
+                if expect[i]>=0:
+                    cost+=loss_func(test_output[i],torch.tensor([expect[i]]))
+                    flag=False
+            if flag:
+                return False
+            
+            #cost=loss_func(test_output[0],torch.tensor(expect[0]))
             test_opt.zero_grad()
             cost.backward()
             test_opt.step()
-          
+            if cost<1e-9:
+                break
+        print(cost)
         pp=test_x.data.numpy()
+        print(pp)
         plt.scatter(pp[:,0],pp[:,1],color='green')
-
+        print(model.decoder(test_x[0]))
             #print(test_x)
             #print("Epoch: [%3d], Loss: %.5f" %(epoch + 1, cost.data))
-
-        
- 
-
+        return True
+    
 def main():
     
     
