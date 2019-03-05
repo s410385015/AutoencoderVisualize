@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.IO;
 namespace AutoencoderVisualize
 {
     public partial class PCP : UserControl
@@ -120,7 +120,7 @@ namespace AutoencoderVisualize
         public int DragSelect;
         public delegate void CallBack();
         public CallBack cb;
-        
+        public Bitmap background;
         public PCP()
         {
             InitializeComponent();
@@ -216,6 +216,7 @@ namespace AutoencoderVisualize
             dragbox = new List<DragBoxAttr>();
             DragSelect = -1;
             drag_color_selected = Color.Green;
+            File.Delete("pcp.png");
         }
 
         public void SetMode(int m)
@@ -361,43 +362,63 @@ namespace AutoencoderVisualize
             else
             {
 
-                DrawAxis();
+                if (!File.Exists("pcp.png")) { 
+                    DrawAxis();
                
-                if (Filter_SearchForAxis())
+                    if (Filter_SearchForAxis())
+                    {
+
+                        Rectangle r = getRectangle();
+                        r = RestrictFilter(r);
+                        filter = r;
+
+                        Rectangle r1 = getRectangle(filter_bound_size);
+                        r1 = RestrictFilter(r1, filter_bound_size);
+                        //g.FillRectangle(new SolidBrush(filter_color_in), r.Location.X, r.Location.Y, r.Width, r.Height);
+
+
+                        for (int i = 0; i < class_num - 1; i++)
+                            DrawDataLine(i);
+                        for (int i = 0; i < class_num - 1; i++)
+                            DrawSingleDataLine(i);
+                        DrawFilter(r, r1);
+                    }
+                    else
+                    {
+                        if (filter_select != -1)
+                            FilterDestory();
+                        for (int i = 0; i < class_num - 1; i++)
+                            DrawDataLine(i);
+                        //for (int i = 0; i < class_num - 1; i++)
+                            //DrawSingleDataLine(i);
+
+                    }
+
+                    if(background==null)
+                        SaveGraphic();
+                }else
                 {
-
-                    Rectangle r = getRectangle();
-                    r = RestrictFilter(r);
-                    filter = r;
-
-                    Rectangle r1 = getRectangle(filter_bound_size);
-                    r1 = RestrictFilter(r1, filter_bound_size);
-                    //g.FillRectangle(new SolidBrush(filter_color_in), r.Location.X, r.Location.Y, r.Width, r.Height);
-
-
-                    for (int i = 0; i < class_num - 1; i++)
-                        DrawDataLine(i);
-                    for (int i = 0; i < class_num - 1; i++)
-                        DrawSingleDataLine(i);
-                    DrawFilter(r, r1);
+                    if(background==null)
+                        background = new Bitmap("pcp.png");
+                    try
+                    {
+                        g.DrawImage(background, new Point(0, 0));
+                        DrawDragBox();
+                        DrawRay();
+                    }catch(Exception ex)
+                    {
+                        //MessageBox.Show(ex.ToString());
+                    }
+                   
                 }
-                else
-                {
-                    if (filter_select != -1)
-                        FilterDestory();
-                    for (int i = 0; i < class_num - 1; i++)
-                        DrawDataLine(i);
-                    //for (int i = 0; i < class_num - 1; i++)
-                       //DrawSingleDataLine(i);
-
-                }
-                DrawDragBox();
-                DrawRay();
+                    
+                
             }
 
 
 
         }
+
 
         public void Reset()
         {
@@ -667,7 +688,7 @@ namespace AutoencoderVisualize
 
         public void label_Click(object sender, EventArgs e)
         {
-
+            //MessageBox.Show("?");   
             Label l = sender as Label;
             MouseEventArgs me = (MouseEventArgs)e;
             int i = 0;
@@ -925,7 +946,7 @@ namespace AutoencoderVisualize
                 }
 
 
-                Console.WriteLine(p1.X + " " + filter.Right + " " + filter.Left);
+                
                 if (p1.X < filter.Left || p1.X > filter.Right)
                     isVisible[i] = false;
                 else
@@ -1315,6 +1336,7 @@ namespace AutoencoderVisualize
 
         private void pictureBox1_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            return;
             if (e.Delta > 0)
             {
                 if (direction)
@@ -1850,6 +1872,17 @@ namespace AutoencoderVisualize
                 }
             }
             return false;
+        }
+
+        public void SaveGraphic()
+        {
+
+           
+            
+            pictureBox1.DrawToBitmap(background, new Rectangle(0, 0, background.Width, background.Height));
+            background.Save("pcp.png");
+            
+            
         }
         
     }

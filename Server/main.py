@@ -156,7 +156,7 @@ class MyServer(SocketServer):
         loss_func=nn.MSELoss()
         test_opt=optim.Adam([test_x],lr=0.1)
 
-        for epoch in range(100):
+        for epoch in range(500):
             test_output=model.decoder(test_x[0])  
             cost=torch.FloatTensor([[0]])
             
