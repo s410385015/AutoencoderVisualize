@@ -20,17 +20,62 @@ namespace AutoencoderVisualize
         public string databasePath = @"C:\\Users\\ec131b\\Desktop\\Yu\\Proj\\Database\\";
         public bool isHandling = false;
         public Bitmap bitmap;
+        public List<Job> JobQueue;
+       
+
         public Form1()
         {
             InitializeComponent();
+            try
+            {
+                string text = System.IO.File.ReadAllText(@"config.txt");
+                databasePath=text+"\\";
+            }
+            catch(Exception ex)
+            {
+               
+            }
+            
+            //button1.Visible=false;
+            //button2.Visible = false;
             idvData = new List<List<List<double>>>();
-            client = new MySocket();
-            client.StartClient("127.0.0.1", 7777);
-            connector.Start();
+            
             this.DoubleBuffered = true;
+            JobQueue = new List<Job>();
+            RegisterJob();
+            UpdateTime.Start();
+            InitConnect();
             //latentTimer.Start();
         }
 
+        
+        public void RegisterJob()
+        {
+            Job latentUpdate = new Job("latent");
+            latentUpdate.cb = UpdateLatent;
+            JobQueue.Add(latentUpdate);
+
+            Job dimgraphUpdate = new Job("dimgraph");
+            dimgraphUpdate.cb = UpdateDimGraph;
+            JobQueue.Add(dimgraphUpdate);
+        }
+
+        public void InitConnect()
+        {
+            client = new MySocket();
+            client.StartClient("127.0.0.1", 7777);
+            connector.Start();
+            
+            string meg = "connect";
+
+            if (client.flag)
+            {
+               
+                client.Send(meg);
+                //latentTimer.Start(); 
+                client.Recv(GetLatentFig);
+            }
+        }
         private void metroUserControl1_Load(object sender, EventArgs e)
         {
 
@@ -38,12 +83,12 @@ namespace AutoencoderVisualize
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            tags = DataLoader.ReadTags(".\\data\\tags1.csv");
-            allData = DataLoader.ReadData(".\\data\\all1.csv");
+            tags = DataLoader.ReadTags(databasePath+"tags.csv");
+            allData = DataLoader.ReadData(databasePath+"effect.csv");
 
             for (int i = 0; i  < 16;i++ )
             {
-                List<List<double>> tmp = DataLoader.ReadData(".\\data\\d" + i + ".csv");
+                List<List<double>> tmp = DataLoader.ReadData(databasePath+"\\data\\d" + i + ".csv");
                 idvData.Add(tmp);
             }
             SubDimGraph.horizontalLabel = false;
@@ -67,24 +112,40 @@ namespace AutoencoderVisualize
             dimGraph.SetInfo(tags.Count, tags.Count, 20, 20, 20, tags.Count, tags.Count * 20, colorBar);
             dimGraph.cbFunc = SetSubData;
             colorBar.cbFunc = UpdateFrame;
-            colorBar.Location = new Point(this.Width-colorBar.width-padRight, dimGraph.Location.Y+dimGraph.padTop-colorBar.padTop);
-            colorBar.SetSize(20, dimGraph.GetGridHeight(),20);
-            colorBar.SetInfo(-0.3, 0.3, 0, Color.LimeGreen, Color.OrangeRed, Color.White, 4);
 
-            dimGraph.Location = new Point(colorBar.Location.X - dimGraph.Width, dimGraph.Location.Y);
-            SubDimGraph.Location = new Point(200, dimGraph.Location.Y);
-            LatentFig.Location = new Point(200, dimGraph.Location.Y +SubDimGraph.Height+100);
+
+
+          
             
+            
+         
             
             SetPCPGraph();
-            
+            LatentFig.Location = new Point((int)(this.Width * 0.07), (int)(this.Height * 0.08));
+            LatentFig.Size = new Size((int)(this.Width * 0.28), (int)(this.Width * 0.21));
+
+            dimGraph.Location = new Point(LatentFig.Location.X + LatentFig.Width, (int)(this.Height * 0.05));
+            dimGraph.Size = new Size((int)(this.Width * 0.3), (int)(this.Height * 0.5));
+            //colorBar.SetSize(20, dimGraph.GetGridHeight(), 20);
+
+            colorBar.Location = new Point(dimGraph.Location.X + colorBar.width + padRight, dimGraph.Location.Y + dimGraph.padTop - colorBar.padTop);
+            colorBar.SetSize(20, dimGraph.GetGridHeight(), 20);
+            colorBar.SetInfo(-0.3, 0.3, 0, Color.LimeGreen, Color.OrangeRed, Color.White, 4);
+
+            SubDimGraph.Size = new Size((int)(this.Width * 0.3), (int)(this.Height * 0.5));
+            SubDimGraph.Location = new Point(dimGraph.Location.X+dimGraph.Width, (int)(this.Height * 0.05));
+           
+
+          
+
             UpdateFrame();
+            
         }
 
         public void SetPCPGraph()
         {
-            pcpGraph.Location = new Point(dimGraph.Location.X, dimGraph.Location.Y + SubDimGraph.Height );
-            pcpGraph.Size = new Size(1000, 500);
+            pcpGraph.Location = new Point((int)(this.Width * 0.05), (int)(this.Height * 0.55) );
+            pcpGraph.Size = new Size((int)(this.Width * 0.9), (int)(this.Height * 0.45));
             pcpGraph.Init();
             pcpGraph.cb = HandlePCPDrag;
             pcpGraph.AlphaChange((int)(10 * 2.55));
@@ -130,8 +191,10 @@ namespace AutoencoderVisualize
 
         private void button2_Click(object sender, EventArgs e)
         {
-            client.Send("latent");
-            client.Recv(GetLatentFig);
+            string meg = "dimgraph";
+            client.Send(meg);
+            //latentTimer.Start(); 
+            client.Recv(GetDimFig);
         }
 
         private void connector_Tick(object sender, EventArgs e)
@@ -144,9 +207,24 @@ namespace AutoencoderVisualize
             }
         }
 
+        public void ChangeJobState(String n,int s)
+        {
+            for (int i = 0; i < JobQueue.Count; i++)
+                if (JobQueue[i].name == n)
+                    JobQueue[i].state = s;
+        }
+
+        public void GetDimFig(IAsyncResult result)
+        {
+            ChangeJobState("dimgraph", 2);
+         
+        }
         public void GetLatentFig(IAsyncResult result)
         {
-            
+
+            ChangeJobState("latent", 2);
+            isHandling = false;
+            /*
             try
             {
                 int len = client.client.EndReceive(result);
@@ -166,6 +244,7 @@ namespace AutoencoderVisualize
                 MessageBox.Show(ex.ToString());
             }
             isHandling = false;
+             */ 
         }
 
         public void HandlePCPDrag()
@@ -184,33 +263,61 @@ namespace AutoencoderVisualize
                 }
                 if(bitmap!=null)
                     bitmap.Dispose();
+                //ChangeJobState("latent", 1);
                 client.Send(meg);
                 //latentTimer.Start(); 
                 client.Recv(GetLatentFig);
             }
         }
 
-        private void latentTimer_Tick(object sender, EventArgs e)
+       
+
+        private void Form1_Shown(object sender, EventArgs e)
         {
-            try
+        
+        }
+        
+        public void UpdateLatent()
+        {
+
+            //bitmap = new Bitmap(databasePath + "latent.png");
+            //LatentFig.Image = bitmap;
+            using (var fs = new System.IO.FileStream(databasePath + "latent.png", System.IO.FileMode.Open))
             {
-
-                bitmap = new Bitmap(databasePath + "latent.png");
-                LatentFig.Image = bitmap;
-                bitmap.Dispose();
-
+                var bmp = new Bitmap(fs);
+                LatentFig.Image = (Bitmap)bmp.Clone();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-
-
-            isHandling = false;
-            
+            //bitmap.Dispose();
         }
 
+
+        public void UpdateDimGraph()
+        {
+            allData = DataLoader.ReadData(databasePath + "effect.csv");
+            idvData.Clear();
+            for (int i = 0; i < 16; i++)
+            {
+                List<List<double>> tmp = DataLoader.ReadData(databasePath + "\\data\\d" + i + ".csv");
+                idvData.Add(tmp);
+            }
+            dimGraph.SetData(allData);
+            dimGraph.NotifyRedraw();
+        }
+
+        private void UpdateTime_Tick(object sender, EventArgs e)
+        {
+            for(int i=0;i<JobQueue.Count;i++)
+            {
+                if (JobQueue[i].state == 1)
+                    JobQueue[i].cb();
+                else if(JobQueue[i].state == 2)
+                {
+                    JobQueue[i].cb();
+                    JobQueue[i].state = 0;
+                }
+            }
+        }
         
-     
+        
     }
 }

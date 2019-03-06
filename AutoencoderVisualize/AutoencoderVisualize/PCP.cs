@@ -121,6 +121,8 @@ namespace AutoencoderVisualize
         public delegate void CallBack();
         public CallBack cb;
         public Bitmap background;
+        public SolidBrush dragboxBrush;
+        public Font dragboxFont;
         public PCP()
         {
             InitializeComponent();
@@ -217,6 +219,8 @@ namespace AutoencoderVisualize
             DragSelect = -1;
             drag_color_selected = Color.Green;
             File.Delete("pcp.png");
+            dragboxBrush = new SolidBrush(Color.Red);
+            dragboxFont=new Font("Arial", 20);
         }
 
         public void SetMode(int m)
@@ -394,8 +398,12 @@ namespace AutoencoderVisualize
 
                     }
 
-                    if(background==null)
+                    if (background == null)
+                    {
                         SaveGraphic();
+                        pictureBox1.Invalidate();
+                     
+                    }
                 }else
                 {
                     if(background==null)
@@ -1845,10 +1853,15 @@ namespace AutoencoderVisualize
             {
                 Point pt = new Point(startX + i * axis_length, startY + (int)(axis_height * dragbox[i].value));
                 Rectangle r = new Rectangle(pt.X - filter_size, pt.Y - filter_size, filter_size * 2, filter_size * 2);
+
                
-                g.FillRectangle(new SolidBrush(filter_color_out), r.Location.X-filter_bound_size, r.Location.Y-filter_bound_size, r.Width+filter_bound_size*2, r.Height+filter_bound_size*2);
-                if(dragbox[i].flag)
+                g.FillRectangle(new SolidBrush(filter_color_out), r.Location.X - filter_bound_size, r.Location.Y - filter_bound_size, r.Width + filter_bound_size * 2, r.Height + filter_bound_size * 2);
+
+                if (dragbox[i].flag)
+                {
                     g.FillRectangle(new SolidBrush(drag_color_selected), r.Location.X, r.Location.Y, r.Width, r.Height);
+                    g.DrawString((1-dragbox[i].value).ToString("0.00"), dragboxFont, dragboxBrush, pt.X + filter_size, pt.Y - +filter_size, label_axis_format);
+                }
                 else
                     g.FillRectangle(new SolidBrush(filter_color_in), r.Location.X, r.Location.Y, r.Width, r.Height);
             }
@@ -1877,11 +1890,13 @@ namespace AutoencoderVisualize
         public void SaveGraphic()
         {
 
-           
-            
+
+            background = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+
             pictureBox1.DrawToBitmap(background, new Rectangle(0, 0, background.Width, background.Height));
             background.Save("pcp.png");
             
+                
             
         }
         

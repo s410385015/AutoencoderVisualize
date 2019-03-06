@@ -34,7 +34,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.connector = new System.Windows.Forms.Timer(this.components);
             this.LatentFig = new System.Windows.Forms.PictureBox();
-            this.latentTimer = new System.Windows.Forms.Timer(this.components);
+            this.UpdateTime = new System.Windows.Forms.Timer(this.components);
             this.pcpGraph = new AutoencoderVisualize.PCP();
             this.SubDimGraph = new AutoencoderVisualize.DimGraph();
             this.colorBar = new AutoencoderVisualize.ColorBar();
@@ -54,7 +54,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(952, 269);
+            this.button2.Location = new System.Drawing.Point(286, 34);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 4;
@@ -78,10 +78,10 @@
             this.LatentFig.TabIndex = 5;
             this.LatentFig.TabStop = false;
             // 
-            // latentTimer
+            // UpdateTime
             // 
-            this.latentTimer.Interval = 30;
-            this.latentTimer.Tick += new System.EventHandler(this.latentTimer_Tick);
+            this.UpdateTime.Interval = 50;
+            this.UpdateTime.Tick += new System.EventHandler(this.UpdateTime_Tick);
             // 
             // pcpGraph
             // 
@@ -133,9 +133,10 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.dimGraph);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Proj";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Shown += new System.EventHandler(this.Form1_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.LatentFig)).EndInit();
             this.ResumeLayout(false);
 
@@ -151,7 +152,7 @@
         private System.Windows.Forms.Timer connector;
         private System.Windows.Forms.PictureBox LatentFig;
         private PCP pcpGraph;
-        private System.Windows.Forms.Timer latentTimer;
+        private System.Windows.Forms.Timer UpdateTime;
 
     }
 }

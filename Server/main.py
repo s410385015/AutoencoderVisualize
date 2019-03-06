@@ -12,6 +12,10 @@ import pylab
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import random
+import os
+import time
+import glob
+import pandas as pd
 
 class MyServer(SocketServer):
 
@@ -20,6 +24,7 @@ class MyServer(SocketServer):
         self.BATCH_SIZE=16
         self.raw_data=Loader('..//Database//Plastics_and_Chemicals_Macro.csv')
         self.data,self._min,self._max=Normalize(self.raw_data)
+        self._data=self.data[:,14:30]
         self.data=self.data[:,14:30]
         self.data=torch.Tensor(self.data)
         self.dataSize=self.data.shape[0]
@@ -29,22 +34,35 @@ class MyServer(SocketServer):
         
         self.AE=self.LoadAE()
         self.la,self.re=self.ModelEval(self.AE)
-        
+         
+    
     def onmessage(self, client, message):
         message=np.array(message.decode("utf-8").split(','))
         
         print ("Client Sent Message")
         print(message)
 
-        if message[0]=='latent':
-            message=(message[1:-1]).astype(np.float)
+        if message[0]=='connect':
+            self.DrawLatent(self.la)
+            self.WaitForFile('..\\Database\\latent.png')
+            plt.savefig('..\\Database\\latent.png',d=600)
+            plt.clf()
+            self.broadcast(str.encode('ok'))
+        elif message[0]=='latent':
+
+            message=(message[1:]).astype(np.float)
             
             print(message)
 
             self.DrawLatent(self.la)
             if self.MatchLatent(self.AE,message):
+                self.WaitForFile('..\\Database\\latent.png')
                 plt.savefig('..\\Database\\latent.png',d=600)
             plt.clf()
+            self.broadcast(str.encode('ok'))
+
+        elif message[0]=='dimgraph':
+            self.DimMaipulate(self.AE,10)   
             self.broadcast(str.encode('ok'))
         #Sending message to all clients
         #self.broadcast(message)
@@ -145,18 +163,42 @@ class MyServer(SocketServer):
         plt.scatter(latent[:,0],latent[:,1],alpha=a,c=colors['hex'])
         
     
+    def FindClosePoint(self,expect):
+        tmp=np.array(self._data)
+        print(tmp.shape)
+        print(expect.shape)
+        for i in range(expect.shape[0]):
+            if expect[i]>=0:
+                tmp[:,i]=tmp[:,i]-expect[i]
+                tmp[:,i]=tmp[:,i]**2
+            else:
+                tmp[:,i]=tmp[:,i]*0
+        tmp=np.sum(tmp,axis=1)
+       
+        idx=tmp.argmin()
+        print(idx)
+        print(self._data[idx])
+        return idx
 
     def MatchLatent(self,model,expect):
         #test_x=Variable(torch.randn(1,2),requires_grad=True)
-        _x=np.mean(self.la[:,0])
-        _y=np.mean(self.la[:,1])
+        
+        idx=self.FindClosePoint(expect)
+
+        test_in=Variable(torch.FloatTensor([self._data[idx]]),requires_grad=False)
+        
+        print("Database:")
+        print(self._data[idx])
+
+        _x,_=model(test_in)
+        test_x=Variable(torch.FloatTensor(_x),requires_grad=True)
+        
         print(_x)
-        print(_y)
-        test_x=Variable(torch.FloatTensor([[_x,_y]]),requires_grad=True)
+        
         loss_func=nn.MSELoss()
         test_opt=optim.Adam([test_x],lr=0.1)
 
-        for epoch in range(500):
+        for epoch in range(100):
             test_output=model.decoder(test_x[0])  
             cost=torch.FloatTensor([[0]])
             
@@ -183,13 +225,68 @@ class MyServer(SocketServer):
             #print("Epoch: [%3d], Loss: %.5f" %(epoch + 1, cost.data))
         return True
     
-def main():
+    def WaitForFile(self,filename):
+        while True:
+            try:
+                with open(filename, 'rb') as _:
+                    break
+            except IOError:
+                time.sleep(3)
+    def WriteTageCSV(self):
+        tags=np.genfromtxt('..//Database//Plastics_and_Chemicals_Macro.csv',delimiter=',',dtype=None)
+        tags=np.delete(tags,0,1)
+        labels_tags=[tags[0,i] for i in range(tags.shape[1])]
+        labels_tags=np.array(labels_tags)
+        labels_tags=labels_tags[14:30]
+        df=pd.DataFrame(labels_tags)
+        df.to_csv("..//Database//tags.csv",header=None,index=None)
     
-    
+    def DimMaipulate(self,model,factor):
+        Container=[]
+        #noise=np.random.uniform(1,2,data.shape[0])
 
+        for i in range(self._data.shape[1]):
+            noise=self._data[:,i]*factor
+            re=[]
+            
+            noise_data=np.array(self._data)
+            noise_data[:,i]=noise
+            _n=torch.Tensor(noise_data)
+            n_dataset=Data.TensorDataset(_n,_n)
+            noise_loader=Data.DataLoader(dataset=n_dataset,batch_size=self._data.shape[0],shuffle=False)
+            for x,_ in noise_loader:
+                x=x.view(x.size(0),-1)
+                x=Variable(x)
+                encoded,decoded=model(x)
+                
+            
+            re=np.array(decoded.data)
+            reconstruct=np.array(self.re) 
+            d=(re/reconstruct)-1
+
+            d[:,i]=np.ones(self._data.shape[0])
+            d=np.array(d,dtype=float)
+
+            Container.append(d)
+            print("dim"+str(i))
+            df=pd.DataFrame(Container[i])
+            self.WaitForFile("..//Database//data//d"+str(i)+".csv")
+            df.to_csv("..//Database//data//d"+str(i)+".csv",header=None,index=None)
+        b=np.array(Container)
+        b=b.sum(axis=1)
+        b/=self._data.shape[0]
+        df=pd.DataFrame(b)
+        df.to_csv("..//Database//effect.csv",header=None,index=None)
+
+def main():
+    SaveDirectory = os.getcwd() #印出目前工作目錄
+    SaveDirectory=SaveDirectory.replace('\Server','')
+    os.chdir("..")
+    with open('config.txt', 'w') as outfile:
+        outfile.write(SaveDirectory+'\\Database\\')
+    os.chdir("Server")
     server = MyServer()
     server.run()
     
-
 if __name__ == "__main__":
     main()
